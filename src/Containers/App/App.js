@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import classes from './App.module.css';
 import Task from '../../Components/Task/Task';
 
@@ -7,6 +7,10 @@ function App() {
   // States
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
+
+  useEffect(() => {
+    elementInput.current.focus();
+  }, []);
 
   // Fonctions
   const removeClickedHandler = index => {
@@ -46,6 +50,9 @@ function App() {
       doneClicked={() => doneClickedHandler(index)}
     />
   ));
+
+  const elementInput = useRef(null);
+
   // let donedTasks = tasks.filter(task => task.done)
   //   .map((filteredTask, index) => (
   //     <Task
@@ -69,7 +76,8 @@ function App() {
             type="text"
             value={input}
             onChange={(e) => changedFormHandler(e)}
-            placeholder="Que souhaitez-vous ajouter ?" />
+            placeholder="Que souhaitez-vous ajouter ?"
+            ref={elementInput} />
           <button type="submit">
             Ajouter
           </button>
