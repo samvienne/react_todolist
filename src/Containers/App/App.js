@@ -8,6 +8,8 @@ function App() {
   // States
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
+
+  //Ref
   const elementInput = useRef(null);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ function App() {
 
     axios.delete('/tasks/'+tasks[index].id + '.json').then(
       response => {
-        console.log(response.data);
+        console.log(response);
       }
     ).catch(error => {
       console.log(error);
@@ -38,7 +40,7 @@ function App() {
 
     axios.put('/tasks/'+ tasks[index].id+'.json', newTasks[index]).then(
       response => {
-        console.log(response.data);
+        console.log(response);
       }
     ).catch(error => {
       console.log(error);
@@ -53,12 +55,11 @@ function App() {
       done: false
     }
     
-    //setTasks([...tasks, newTask]);
+    setTasks([...tasks, newTask]);
 
     axios.post('/tasks.json', newTask).then(
       data => {
         console.log(data);
-        elementInput.current.focus();
       }
     ).catch(error => {
       console.log(error);
