@@ -1,15 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import classes from './App.module.css';
 import Task from '../../Components/Task/Task';
+import axios from '../../axios-firebase';
 
 function App() {
 
   // States
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
+  const elementInput = useRef(null);
 
   useEffect(() => {
+    getTasks();
     elementInput.current.focus();
+    
   }, []);
 
   // Fonctions
@@ -17,12 +21,28 @@ function App() {
     const newTasks = [...tasks];
     newTasks.splice(index, 1);
     setTasks(newTasks);
+
+    axios.delete('/tasks/'+tasks[index].id + '.json').then(
+      response => {
+        console.log(response.data);
+      }
+    ).catch(error => {
+      console.log(error);
+    });
   }
 
   const doneClickedHandler = index => {
     const newTasks = [...tasks];
     newTasks[index].done = !tasks[index].done;
     setTasks(newTasks);
+
+    axios.put('/tasks/'+ tasks[index].id+'.json', newTasks[index]).then(
+      response => {
+        console.log(response.data);
+      }
+    ).catch(error => {
+      console.log(error);
+    });
   }
 
   const submittedTaskHandler = event => {
@@ -32,7 +52,17 @@ function App() {
       content: input,
       done: false
     }
-    setTasks([...tasks, newTask]);
+    
+    //setTasks([...tasks, newTask]);
+
+    axios.post('/tasks.json', newTask).then(
+      data => {
+        console.log(data);
+        elementInput.current.focus();
+      }
+    ).catch(error => {
+      console.log(error);
+    });
     setInput('');
   }
 
@@ -41,28 +71,32 @@ function App() {
   }
 
   // Variables
-  let tasksDisplayed = tasks.map((task, index) => (
-    <Task
-      done={task.done}
-      content={task.content}
-      key={index}
-      removeClicked={() => removeClickedHandler(index)}
-      doneClicked={() => doneClickedHandler(index)}
-    />
-  ));
+  let getTasks = () => {
+    axios.get('/tasks.json').then(response => {
+      const newTasks= [];
+      for(let key in response.data) {
+        newTasks.push({
+          ...response.data[key],
+          id: key
+        });
+      }
+      setTasks(newTasks);
+    }).catch(error => {
+      console.log(error);
+    });
+  }
 
-  const elementInput = useRef(null);
-
-  // let donedTasks = tasks.filter(task => task.done)
-  //   .map((filteredTask, index) => (
-  //     <Task
-  //       done={filteredTask.done}
-  //       content={filteredTask.content}
-  //       key={index}
-  //       removeClicked={() => removeClickedHandler(index)}
-  //       doneClicked={() => doneClickedHandler(index)}
-  //     />
-  // ));
+  let tasksDisplayed = tasks.map((task, index) => {
+    return(
+      <Task
+        done={task.done}
+        content={task.content}
+        key={index}
+        removeClicked={() => removeClickedHandler(index)}
+        doneClicked={() => doneClickedHandler(index)}
+      />
+    );
+  });
 
   return (
     <div className={classes.App}>
@@ -85,6 +119,7 @@ function App() {
       </div>
 
       {tasksDisplayed}
+  
     </div>
   );
 }
